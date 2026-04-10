@@ -1,68 +1,225 @@
-# CodeIgniter 4 Application Starter
+# LUME - Social Learning Platform
 
-## What is CodeIgniter?
+LUME is a comprehensive social learning platform built with CodeIgniter 4. It provides a collaborative environment for users to share knowledge, engage in discussions, track learning progress, and build communities around educational content.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## Features
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+- **User Authentication**: Secure registration and login with email OTP verification
+- **Social Posts**: Create, share, and interact with posts and comments
+- **Learning Modules**: Structured learning paths and progress tracking
+- **Leaderboard**: Gamified learning with rankings and achievements
+- **Dashboard**: Personalized user dashboard for activity overview
+- **Profile Management**: Customizable user profiles with avatars and college info
+- **Search Functionality**: Find posts, users, and content easily
+- **Email Notifications**: OTP-based authentication and password resets
+- **Responsive Design**: Mobile-friendly interface
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## Requirements
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+- PHP 8.1 or higher
+- MySQL 5.7+ or MariaDB 10.1+
+- Composer
+- Node.js and npm (for frontend assets, if applicable)
 
-## Installation & updates
+### PHP Extensions
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+- intl
+- mbstring
+- mysqlnd
+- libcurl
+- json (enabled by default)
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+## Installation
 
-## Setup
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/snakspy80/LUME.git
+   cd LUME
+   ```
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+2. **Install PHP dependencies**:
+   ```bash
+   composer install
+   ```
 
-## Important Change with index.php
+3. **Environment Setup**:
+   - Copy `env` to `.env`:
+     ```bash
+     cp env .env
+     ```
+   - Edit `.env` and configure:
+     - Database settings (hostname, database name, username, password)
+     - Base URL: `app.baseURL = 'http://localhost:8080'`
+     - Email settings (see Email Configuration below)
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+4. **Database Setup**:
+   ```bash
+   php spark migrate
+   php spark db:seed  # If seeds are available
+   ```
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+5. **Set up writable directories**:
+   ```bash
+   chmod -R 755 writable/
+   ```
 
-**Please** read the user guide for a better explanation of how CI4 works!
+## Running the Application
 
-## Repository Management
+### Development Server
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+```bash
+php spark serve
+```
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+Access at: http://localhost:8080
 
-## Server Requirements
+### Production Deployment
 
-PHP version 8.1 or higher is required, with the following extensions installed:
+Configure your web server (Apache/Nginx) to point to the `public/` directory.
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+**Apache Example** (in .htaccess or virtual host):
+```
+DocumentRoot /path/to/LUME/public
+<Directory /path/to/LUME/public>
+    AllowOverride All
+    Require all granted
+</Directory>
+```
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
+**Nginx Example**:
+```
+server {
+    listen 80;
+    server_name yourdomain.com;
+    root /path/to/LUME/public;
+    index index.php;
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+```
+
+## Email Configuration for OTP
+
+LUME uses email OTP for secure authentication. Configure SMTP settings in `.env`:
+
+```env
+# Email Configuration
+email.protocol = 'smtp'
+email.SMTPHost = 'your-smtp-host.com'
+email.SMTPUser = 'your-email@domain.com'
+email.SMTPPass = 'your-password'
+email.SMTPPort = 587
+email.SMTPCrypto = 'tls'
+email.fromEmail = 'noreply@lume.com'
+email.fromName = 'LUME Platform'
+```
+
+### Supported Email Providers
+
+- **Gmail**: Use App Passwords
+- **SendGrid**: API key as password
+- **Mailgun**: SMTP credentials
+- **AWS SES**: SMTP credentials
+
+### Testing Email
+
+Use the built-in command to test email:
+```bash
+php spark email:test your-email@example.com
+```
+
+## Self-Hosting
+
+For local development or personal hosting, see [SELF_HOSTING.md](SELF_HOSTING.md) for detailed instructions on running LUME on your PC, LAN sharing, and basic deployment.
+
+## Maintenance
+
+### Regular Tasks
+
+1. **Update Dependencies**:
+   ```bash
+   composer update
+   ```
+
+2. **Run Migrations** (after updates):
+   ```bash
+   php spark migrate
+   ```
+
+3. **Clear Cache**:
+   ```bash
+   php spark cache:clear
+   ```
+
+4. **Backup Database**:
+   ```bash
+   mysqldump -u username -p database_name > backup.sql
+   ```
+
+### Security
+
+- Keep PHP and dependencies updated
+- Use strong passwords
+- Enable HTTPS in production
+- Regularly review logs in `writable/logs/`
+- Monitor failed login attempts
+
+### Performance
+
+- Enable OPcache
+- Use a CDN for static assets
+- Optimize database queries
+- Implement caching where appropriate
+
+## Project Structure
+
+```
+app/
+├── Config/          # Configuration files
+├── Controllers/     # Request handlers
+├── Models/          # Database models
+├── Views/           # Templates
+├── Helpers/         # Utility functions
+├── Libraries/       # Custom libraries
+├── Filters/         # Request filters
+├── Language/        # Localization
+└── Database/        # Migrations and seeds
+
+public/              # Web root
+├── index.php        # Entry point
+├── .htaccess        # Apache config
+└── uploads/         # User uploads
+
+writable/            # Application data
+├── cache/           # Cache files
+├── logs/            # Log files
+├── session/         # Session data
+└── uploads/         # Generated uploads
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For issues and questions:
+- Create an issue on GitHub
+- Check the CodeIgniter documentation
+- Review application logs in `writable/logs/`
